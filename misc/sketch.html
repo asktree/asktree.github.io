@@ -26,7 +26,8 @@ path:hover {
 		<b>arrowkeys</b> to move pointer <br>
 		hold <b>Space</b> to move secondary pointer <br>
 		<b>wasd</b> to move across polar coordinates centered on secondary pointer <br>
-		hold <b>f</b> to move pointer without drawing.
+		hold <b>f</b> to move pointer without drawing.<br>
+		<b>click</b> a path to select or deselect it, and <b>delete</b> to remove it.
 	</div>
 </div>
 <script src="https://d3js.org/d3.v4.min.js"></script>
@@ -120,7 +121,7 @@ function update() {
 	sdraw2
 		.attr("cx", function (d) {return sball.x;})
 		.attr("cy", function (d) {return sball.y;})
-		
+	
 	if (!fmode){
 		next
 			.attr("d", path);
@@ -260,9 +261,15 @@ function line_out(d, i) {
 }
 
 function line_click(d, i) {
-	selected = d3.select(this)
-		.style("stroke", "red")
-		;
+	if (selected._groups[0].includes(this)) {
+		selected = d3.select();
+	}
+	else selected = d3.select(this)
+	d3.selectAll("path")
+		.style("stroke", "#000");
+			
+	selected
+		.style("stroke", "#f00");
 }
 
 function move() {
@@ -283,6 +290,7 @@ function move() {
 			sdraw2.attr("display", "true");
 		}
 		else if (k == "Delete") selected.remove();
+		//else if (k == "Shift") 
 		makenext();
 	}
 }
