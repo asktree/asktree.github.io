@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Slab:bold" rel="stylesheet">
+<style type='text/css'>
+#wrapper {
+position: fixed;
+margin: 0;
+padding:10px;
+top:0;
+left:0;
+width: 100%;
+height: 100%;
+//text-align: center;
+//background: color;
+background-color: #f6f6f6;
+//background-image: url("grid.png");
+//background-repeat: repeat;
+color: #111;
+font-family: 'Roboto', sans-serif;
+}
+
+#name {
+font-family: 'Roboto Slab', serif;
+mask-image: linear-gradient(black 0%, transparent 100%);
+mask-mode: alpha;
+font-size: 100px;
+//font-weight: 500;
+}
+
+#heading {
+font-family: 'Roboto Slab', serif;
+font-size: 48px;
+//font-weight: 500;
+color: #bbb;
+}
+
+.tab {
+margin-left: 1em;
+overflow:
+}
+
+</style>
+<body>
+<div id="wrapper">
+	<div id="name">
+		<svg height="1em" width="500px">
+			<mask width="500px" height="500px" id="namemask">
+				<text x="0" y=".8em" fill="white" stroke="white">
+					Agrippa 
+				</text>
+			</mask>
+			<rect fill="#111" height="500" width="500" mask="url(#namemask)"/>
+		</svg>
+	</div>
+	<div id="heading">
+		Projects
+		<div class="tab">
+			<svg height="1em" width="800px" class="rollover">
+				<mask width="500px" height="500px" id="roll2">
+					<text x="0" y=".8em" fill="white" stroke="white">
+						Hairball
+					</text>
+				</mask>
+				<image xlink:href="hair.PNG" x="0" y="-15" height="72" width="284" mask="url(#roll2)"/>
+			</svg>
+		</div>
+		Published Writing
+		<div class="tab">
+			<svg height="1em" width="100%" class="rollover">
+				<mask width="500px" height="500px" id="roll3">
+					<text x="0" y=".8em" fill="white" stroke="white">
+						Automation and Work
+					</text>
+				</mask>
+				<image xlink:href="svh.png" x="0" y="-250" height="500" width="500" mask="url(#roll3)"/>
+			</svg>
+			<svg height="1em" width="100%" class="rollover">
+				<mask width="500px" height="500px" id="roll4">
+					<text x="0" y=".8em" fill="white" stroke="white">
+						Mississippi 
+					</text>
+				</mask>
+				<image xlink:href="river.PNG" x="0" y="-25" height="100" width="300" mask="url(#roll4)"/>
+			</svg>
+			<svg height="1em" width="100%" class="rollover">
+				<mask width="500px" height="500px" id="roll5">
+					<text x="0" y=".8em" fill="white" stroke="white">
+						Growing Up Online
+					</text>
+				</mask>
+				<image xlink:href="bl.PNG" x="0" y="0" height="51" width="450" mask="url(#roll5)"/>
+			</svg>
+		</div>
+		Sculpture<br>
+		Contact
+	</div>
+	<div class="tab">
+		email : first last @ gmail.com <br>
+		Cornell netID : ask252
+	</div>
+
+</div>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+
+var t = d3.selectAll(".rollover")
+		.on("mouseover", thicken)
+		.on("mouseout", unthicken)
+		;
+		 
+function thicken(){
+	n = d3.select(this).select("text")
+		//.style("fill", "none")
+		.transition(d3.transition().duration(2000))
+			.style("stroke-width", "200")
+		//.style("writing-mode", "tb")
+		;
+}
+function unthicken(){
+	n = d3.select(this).select("text")
+		.transition(d3.transition().duration(2000))
+			.style("stroke-width", "0")
+		//.style("writing-mode", "tb")
+		;
+}
+</script>
+
+</body>

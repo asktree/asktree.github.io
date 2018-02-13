@@ -1,0 +1,259 @@
+<meta charset="utf-8">
+<style>
+#wrap {
+	position: relative;
+	width: 100%;
+	height: 1000px;
+}
+
+#help {
+	position: absolute;
+	font-family: 'Courier New', 'Courier', monospace;
+	top: 0px;
+	left: 0px;
+}
+</style>
+<body>
+<div id="wrap">
+	<div id="help">
+		<b>arrowkeys</b> to move pointer <br>
+		hold <b>s</b> to move secondary pointer <br>
+		hold <b>d</b> to maintain fixed distance from secondary pointer <br>
+		hold <b>c</b> to move pointer along line to secondary pointer <br>
+		hold <b>f</b> to move pointer without drawing.
+	</div>
+</div>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+svg = d3.select("#wrap").append("svg")
+	.attr("width", "100%")
+	.attr("height", "100%")
+	;
+
+d3.select("body")
+	.on("keydown", move)
+	.on("keyup", unmove)
+	;
+var sim = d3.forceSimulation();
+trail = svg.append("g")
+
+mx = +(svg.style("width").slice(0,-2))/2
+my = +(svg.style("height").slice(0,-2))/2
+
+var ball = {x: mx, y: my};
+var sball = {x: mx, y: my};
+var dball = {x: mx, y: my};
+
+sim
+	.nodes([ball, sball])
+	.alphaDecay(0)
+	.alpha(.001)
+	.on("tick", update)
+	.velocityDecay(0.001)
+	.restart()
+	;
+
+var draw = svg.append("circle")
+	.data([ball])
+	.attr("r", 3)
+	;
+
+var sdraw = svg.append("circle")
+	.data([sball])
+	.style("stroke-dasharray", "4,4")
+	.attr("fill", "none")
+	.style("stroke", "#000")
+	.style("stroke-width", 2)
+	.attr("display", "none")
+	;
+
+var sdraw2 = svg.append("circle")
+	.attr("fill", "none")
+	.style("stroke-width", 2)
+	.style("stroke", "#000")
+	.attr("r", 3)
+	.attr("display", "none")
+	;
+	
+var next;
+var path = d3.path();
+	
+var ts = [];
+var right = 0,
+	down = 0,
+	smode = false,
+	dmode = false,
+	fmode = false,
+	cmode = false;
+
+	
+function cartesian2Polar(x, y){
+	var vecx = x-sball.x
+	var vecy = y-sball.y
+    distance = Math.sqrt(vecx*vecx + vecy*vecy)
+    radians = Math.atan2(vecy,vecx) //This takes y first
+    polarCoor = { distance:distance, radians:radians }
+    return polarCoor
+}
+
+	
+function update() {
+	if (dmode) {
+		var cart = cartesian2Polar(ball.x, ball.y);
+		
+		cart.radians += 1/cart.distance;
+		
+		ball.x = sball.x + cart.distance*Math.cos(cart.radians);
+		ball.y = sball.y + cart.distance*Math.sin(cart.radians);
+		
+		if (cart.radians > 1){
+			//makenext();
+			dball.x = ball.x;
+			dball.y = ball.y;
+			makenext();
+		}
+		
+		path = linkArc()
+	}
+	
+	else if (cmode) {
+		ball.x += right;
+		ball.y += down;
+		
+		var vecx = ball.x-sball.x
+		var vecy = ball.y-sball.y
+		
+		var projx = dball.x-sball.x
+		var projy = dball.y-sball.y
+		
+		var norm = Math.sqrt(Math.pow(sball.x-dball.x,2)+Math.pow(sball.y-dball.y,2))
+		if (norm > 0) {
+			ball.x = sball.x + projx*(vecx*projx + vecy*projy)/Math.pow(norm, 2);
+			ball.y = sball.y + projy*(vecx*projx + vecy*projy)/Math.pow(norm, 2);
+			path._[5] = ball.x;
+			path._[7] = ball.y;
+		}
+		
+	}
+	
+	else if (smode) {
+		sball.x += right;
+		sball.y += down;
+		dball.x = ball.x;
+		dball.y = ball.y;
+	}
+	
+	else {
+		ball.x += right;
+		ball.y += down;
+		//sball.x = ball.x;
+		//sball.y = ball.y;
+		dball.x = ball.x;
+		dball.y = ball.y;
+		path._[5] = ball.x;
+		path._[7] = ball.y;
+		//console.log(path)
+	}
+		
+	draw
+		.attr("cx", function (d) {return d.x;})
+		.attr("cy", function (d) {return d.y;})
+		;
+	
+	sdraw
+		.attr("cx", function (d) {return d.x;})
+		.attr("cy", function (d) {return d.y;})
+		.attr("r", function(d) {return Math.sqrt(Math.pow(d.x-ball.x,2)+Math.pow(d.y-ball.y,2));})
+		;
+		
+	sdraw2
+		.attr("cx", function (d) {return sball.x;})
+		.attr("cy", function (d) {return sball.y;})
+		
+	if (!fmode){
+		next
+			.attr("d", path);
+	}
+}
+
+function makenext() {
+	next = svg.append("path")
+		.style("stroke-width", 2)
+		.style("stroke", "#000")
+		.style("fill", "none")
+		;
+	path = d3.path();
+	path.moveTo(ball.x, ball.y);
+	path.lineTo(ball.x, ball.y);
+	}
+
+function linkArc() {
+	var dx = ball.x - dball.x,
+		dy = ball.y - dball.y,
+		dr = Math.sqrt(Math.pow(sball.x-dball.x,2)+Math.pow(sball.y-dball.y,2)),
+		flag = 0;
+	// if we're on opposite sides and im further horizontally
+	idiot = (((ball.y > sball.y)^(dball.y > sball.y)) && (Math.abs(dball.x-sball.x) < Math.abs(ball.x-sball.x)))
+	flag = flag^(ball.x > dball.x)^(ball.y > sball.y)^idiot;
+	
+	return "M" + dball.x + "," + dball.y + "A" + dr + "," + dr + " 0 0,"+flag+" " + ball.x + "," + ball.y;
+}
+
+function makearc() {
+	console.log(2);
+	arc = d3.path().arcTo(dball.x, dball.y, ball.x, ball.y, Math.sqrt(Math.pow(dball.x-ball.x,2)+Math.pow(dball.y-ball.y,2)))
+	return arc;
+}
+
+function makeline(path) {
+	p = d3.path();
+	p.lineTo(ball.x, ball.y);
+	return p;
+}
+
+function move() {
+	if (!d3.event.repeat) { 
+		k = d3.event.key
+		if (k == "ArrowLeft") right = -1;
+		else if (k == "ArrowRight") right = 1;
+		else if (k == "ArrowUp") down = -1;
+		else if (k == "ArrowDown") down = 1;
+		else if (k == "d") {
+			dmode = true;
+		}
+		else if (k == 'c') {
+			cmode = true;
+		}
+		else if (k == "f") fmode = true;
+		else if (k == "s") {
+			smode = true;
+			sdraw.attr("display", "true");
+			sdraw2.attr("display", "true");
+		}
+		makenext();
+	}
+}
+
+function unmove() {
+	k = d3.event.key
+	if (k == "ArrowLeft") right = 0;
+	else if (k == "ArrowRight") right = 0;
+	else if (k == "ArrowUp") down = 0;
+	else if (k == "ArrowDown") down = 0;
+	else if (k == "d") {
+		dmode = false;
+	}
+	else if (k == 'c') {
+		cmode = false;
+	}
+	else if (k == "f") fmode = false;
+	else if (k == "s") {
+		smode = false;
+		sdraw.attr("display", "none");
+		sdraw2.attr("display", "none");
+	}
+	makenext();
+}
+
+
+</script>
