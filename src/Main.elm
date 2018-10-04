@@ -105,7 +105,7 @@ contacts =
     column
         []
         [
-          contact "mailto:someone@yoursite.com" "email"
+          contact "mailto:agrippakellum@gmail.com" "email"
         , contact "https://github.com/asktree" "github"
         , contact "https://twitter.com/about_agrippa" "twitter"
         , contact "https://www.linkedin.com/in/agrippa-k-ba59579a/" "linkedin"
