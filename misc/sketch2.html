@@ -289,9 +289,12 @@ function move() {
 			sdraw.attr("display", "true");
 			sdraw2.attr("display", "true");
 			*/
-			let _ball = dball;
-			dball = sball;
-			sball = dball;
+			let _x = ball.x;
+            let _y = ball.y;
+            ball.x = sball.x;
+            ball.y = sball.y;
+            sball.x = _x;
+            sball.y = _y;
 		}
 		else if (k == "Delete") selected.remove();
 		//else if (k == "Shift") 
@@ -317,9 +320,12 @@ function unmove() {
 		sdraw.attr("display", "none");
 		sdraw2.attr("display", "none");
 		*/
-		let _ball = dball;
-		dball = sball;
-		sball = dball;
+		let _x = ball.x;
+        let _y = ball.y;
+		ball.x = sball.x;
+		ball.y = sball.y;
+        sball.x = _x;
+        sball.y = _y;
 	}
 	makenext();
 }
